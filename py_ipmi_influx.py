@@ -35,7 +35,9 @@ def get_hostname():
 def send_to_database(body):
     client = database_connection()
     write_api = client.write_api(write_options=SYNCHRONOUS)
-    
+    print(body)
+    print(os.getenv("INFLUX_BUCKET"))
+    print(os.getenv("INFLUX_ORG"))
     result = write_api.write(bucket = os.getenv("INFLUX_BUCKET"), org= os.getenv("INFLUX_ORG"), dict=body)
     print(result)
     client.close()
