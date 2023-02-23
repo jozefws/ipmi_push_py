@@ -32,8 +32,7 @@ def get_hostname():
     return output
 
 # Send to localhost influx database
-def send_to_database(cpu_temps, psu_watts, hostname):
-    body = encode_to_json(cpu_temps, psu_watts, hostname)
+def send_to_database(body):
     client = database_connection()
     write_api = client.write_api(write_options=SYNCHRONOUS)
     
@@ -42,41 +41,41 @@ def send_to_database(cpu_temps, psu_watts, hostname):
     client.close()
     return
 
-def encode_to_json(cpu_temps, psu_watts, hostname):
-    json_body = []
+def encode_to_dict(cpu_temps, psu_watts, hostname):
     cpu_count = 1
     psu_count = 1
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     
     for i in cpu_temps:
-        json_body.append({
+        cpu_body ={
             "measurement": "cpu_temp",
             "tags": {
-                "cpu": str(cpu_count),
-                "host": hostname
+                "host": hostname,
+                "cpu": cpu_count
             },
-            "time": timestamp,
             "fields": {
-                "value": float(i[:-1])
-            }
-        })
-        cpu_count+=1
+                "value": i
+            },
+            "time": timestamp
+        }
+        cpu_count += 1
+        send_to_database(cpu_body, hostname)
 
     for i in psu_watts:
-        json_body.append({
-            "measurement": "psu_watts",
+        psu_body={
+            "measurement": "psu_watt",
             "tags": {
-                "psu": str(psu_count),
-                "host": hostname
+                "host": hostname,
+                "psu": psu_count
             },
-             "time": timestamp,
             "fields": {
-                "value": float(i[:-1])
-            }
-        })
-        psu_count+=1
-    print(json_body)
-    return json_body
+                "value": i
+            },
+            "time": timestamp
+        }
+        psu_count += 1
+        send_to_database(psu_body, hostname)
+
 
 def database_connection():
     load_dotenv()
@@ -84,8 +83,7 @@ def database_connection():
         url=os.getenv("INFLUX_URL")+":"+os.getenv("INFLUX_PORT"),
         token=os.getenv("INFLUX_TOKEN"),
         org=os.getenv("INFLUX_ORG"),
-        # ssl=os.getenv("INFLUX_SSL"),
-        # verify_ssl=os.getenv("INFLUX_VERIFY_SSL"),
+        verify_ssl=os.getenv("INFLUX_VERIFY_SSL"),
     )
     return client
 
@@ -94,6 +92,6 @@ def database_connection():
 if __name__ == '__main__':
     cpu_temps, psu_watts = run_ipmi_sensors()
     hostname = get_hostname()
-    send_to_database(cpu_temps, psu_watts, hostname)
+    encode_to_dict(cpu_temps, psu_watts, hostname)
 
 
