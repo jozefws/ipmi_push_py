@@ -55,7 +55,7 @@ def encode_to_json(cpu_temps, psu_watts, hostname):
                 "cpu": str(cpu_count),
                 "host": hostname
             },
-            "time": {},
+            "time": {timestamp},
             "fields": {
                 "value": float(i[:-1])
             }
@@ -69,6 +69,7 @@ def encode_to_json(cpu_temps, psu_watts, hostname):
                 "psu": str(psu_count),
                 "host": hostname
             },
+             "time": {timestamp},
             "fields": {
                 "value": float(i[:-1])
             }
