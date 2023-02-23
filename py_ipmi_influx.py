@@ -2,7 +2,7 @@ import os
 import re
 # from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
 from dotenv import load_dotenv
-from influxdb import InfluxDBClient
+from influxdb_client import InfluxDBClient
 from datetime import datetime
  
 # Run ipmi command and return the output
@@ -34,7 +34,9 @@ def get_hostname():
 def send_to_database(cpu_temps, psu_watts, hostname):
     body = encode_to_json(cpu_temps, psu_watts, hostname)
     client = database_connection()
-    if client.write_points(body):
+    write_api = client.write_api()
+
+    if write_api.write(os.getenv("INFLUX_BUCKET"), os.getenv("INFLUX_ORG"), body):
         print("Data sent to influx")
     else:
         print("Failed to send data to influx")
@@ -86,7 +88,6 @@ def database_connection():
         ssl=os.getenv("INFLUX_SSL"),
         verify_ssl=os.getenv("INFLUX_VERIFY_SSL"),
     )
-    client.switch_database(os.getenv("INFLUX_BUCKET"))
     return client
 
     

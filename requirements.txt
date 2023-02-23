@@ -1,2 +1,2 @@
 python-dotenv==0.21.1
-influxdb==5.3.1
+influxdb-client==1.21.0
