@@ -1,9 +1,8 @@
 import os
 import re
-# from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
-from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client.client.exceptions import InfluxDBError
 from datetime import datetime
  
 # Run ipmi command and return the output
@@ -31,25 +30,14 @@ def get_hostname():
     output = stream.read()
     return output
 
-# Send to localhost influx database
-def send_to_database(body):
-    client = database_connection()
-    write_api = client.write_api(write_options=SYNCHRONOUS)
-    print(body)
-    print(os.getenv("INFLUX_BUCKET"))
-    print(os.getenv("INFLUX_ORG"))
-    result = write_api.write(bucket = os.getenv("INFLUX_BUCKET"), org= os.getenv("INFLUX_ORG"), dict=body)
-    print(result)
-    client.close()
-    return
-
-def encode_to_dict(cpu_temps, psu_watts, hostname):
+def to_dict(cpu_temps, psu_watts, hostname):
+    dict = []
     cpu_count = 1
     psu_count = 1
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     
     for i in cpu_temps:
-        cpu_body ={
+        dict.append({
             "measurement": "cpu_temp",
             "tags": {
                 "host": hostname,
@@ -59,12 +47,11 @@ def encode_to_dict(cpu_temps, psu_watts, hostname):
                 "value": i
             },
             "time": timestamp
-        }
+        })
         cpu_count += 1
-        send_to_database(cpu_body)
 
     for i in psu_watts:
-        psu_body={
+        dict.append({
             "measurement": "psu_watt",
             "tags": {
                 "host": hostname,
@@ -74,26 +61,33 @@ def encode_to_dict(cpu_temps, psu_watts, hostname):
                 "value": i
             },
             "time": timestamp
-        }
+        })
         psu_count += 1
-        send_to_database(psu_body)
+    
+    return dict
 
+# Send to localhost influx database
+def send_to_influx(dict):
 
-def database_connection():
-    load_dotenv()
     client = InfluxDBClient(
-        url=os.getenv("INFLUX_URL")+":"+os.getenv("INFLUX_PORT"),
+        url=os.getenv("INFLUX_URL") + ":" + os.getenv("INFLUX_PORT"),
         token=os.getenv("INFLUX_TOKEN"),
         org=os.getenv("INFLUX_ORG"),
-        verify_ssl=os.getenv("INFLUX_VERIFY_SSL"),
+        verify_ssl=False
     )
-    return client
+
+    with client:
+        try:
+            client.write_api(write_options=SYNCHRONOUS).write(bucket=os.getenv("INFLUX_BUCKET"), record=dict)
+        except InfluxDBError as e:
+            print(e)
 
     
 
 if __name__ == '__main__':
     cpu_temps, psu_watts = run_ipmi_sensors()
     hostname = get_hostname()
-    encode_to_dict(cpu_temps, psu_watts, hostname)
+    data = to_dict(cpu_temps, psu_watts, hostname)
+    send_to_influx(data)
 
 
