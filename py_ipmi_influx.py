@@ -68,6 +68,8 @@ def to_dict(cpu_temps, psu_watts, hostname):
 
 # Send to localhost influx database
 def send_to_influx(dict):
+    print(os.getenv("INFLUX_URL"))
+    print(os.getenv("INFLUX_PORT"))
     url_port = os.getenv("INFLUX_URL") + ":" + os.getenv("INFLUX_PORT")
     print(url_port)
     client = InfluxDBClient(
