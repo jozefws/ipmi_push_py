@@ -59,7 +59,7 @@ def encode_to_dict(cpu_temps, psu_watts, hostname):
             "time": timestamp
         }
         cpu_count += 1
-        send_to_database(cpu_body, hostname)
+        send_to_database(cpu_body)
 
     for i in psu_watts:
         psu_body={
@@ -74,7 +74,7 @@ def encode_to_dict(cpu_temps, psu_watts, hostname):
             "time": timestamp
         }
         psu_count += 1
-        send_to_database(psu_body, hostname)
+        send_to_database(psu_body)
 
 
 def database_connection():
