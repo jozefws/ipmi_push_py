@@ -37,10 +37,8 @@ def send_to_database(cpu_temps, psu_watts, hostname):
     client = database_connection()
     write_api = client.write_api(write_options=SYNCHRONOUS)
     
-    if write_api.write(bucket = os.getenv("INFLUX_BUCKET"), org= os.getenv("INFLUX_ORG"), dict=body):
-        print("Data sent to influx")
-    else:
-        print("Failed to send data to influx")
+    result = write_api.write(bucket = os.getenv("INFLUX_BUCKET"), org= os.getenv("INFLUX_ORG"), dict=body)
+    print(result)
     client.close()
     return
 
