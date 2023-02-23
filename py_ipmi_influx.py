@@ -30,23 +30,6 @@ def get_hostname():
     output = stream.read()
     return output
 
-# Send the data to prometheus
-# def send_to_prometheus(cpu_temps, psu_watts, hostname):
-#     registry = CollectorRegistry()
-#     cpu_count = 1
-#     psu_count = 1
-#     for i in cpu_temps:
-#         g = Gauge('cpu_temp_' + str(cpu_count), 'CPU Temperature', ['cpu', 'host'], registry=registry)
-#         g.labels(cpu=i, host=hostname).set(i[:-1])
-#         cpu_count+=1
-
-#     for i in psu_watts:
-#         g = Gauge('psu_watts_'+str(psu_count), 'PSU Watts', ['psu', 'host'], registry=registry)
-#         g.labels(psu=i, host=hostname).set(i[:-1])
-#         psu_count+=1
-
-#     push_to_gateway('', job='ipmi_' + hostname, registry=registry)
-
 # Send to localhost influx database
 def send_to_database(cpu_temps, psu_watts, hostname):
     body = encode_to_json(cpu_temps, psu_watts, hostname)

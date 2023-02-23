@@ -1,2 +1,2 @@
 # ipmi_push_py
- IPMI Push to Prometheus using Pushgateway
+ IPMI Push to InfluxDB TimeSeries Database
