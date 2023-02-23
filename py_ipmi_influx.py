@@ -80,14 +80,13 @@ def encode_to_json(cpu_temps, psu_watts, hostname):
 def database_connection():
     load_dotenv()
     client = InfluxDBClient(
-        host=os.getenv("INFLUX_HOST"),
-        port=os.getenv("INFLUX_PORT"),
-        username=os.getenv("INFLUX_USER"),
-        password=os.getenv("INFLUX_PASS"),
+        url=os.getenv("INFLUX_URL")+":"+os.getenv("INFLUX_PORT"),
+        token=os.getenv("INFLUX_TOKEN"),
+        org=os.getenv("INFLUX_ORG"),
         ssl=os.getenv("INFLUX_SSL"),
         verify_ssl=os.getenv("INFLUX_VERIFY_SSL"),
     )
-    client.switch_database(os.getenv("INFLUX_DB_NAME"))
+    client.switch_database(os.getenv("INFLUX_BUCKET"))
     return client
 
     
