@@ -3,6 +3,7 @@ import re
 # from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
 from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient
+from influxdb_client.client.write_api import SYNCHRONOUS
 from datetime import datetime
  
 # Run ipmi command and return the output
@@ -34,9 +35,9 @@ def get_hostname():
 def send_to_database(cpu_temps, psu_watts, hostname):
     body = encode_to_json(cpu_temps, psu_watts, hostname)
     client = database_connection()
-    write_api = client.write_api()
-
-    if write_api.write(os.getenv("INFLUX_BUCKET"), os.getenv("INFLUX_ORG"), body):
+    write_api = client.write_api(write_options=SYNCHRONOUS)
+    
+    if write_api.write(bucket = os.getenv("INFLUX_BUCKET"), org= os.getenv("INFLUX_ORG"), dict=body):
         print("Data sent to influx")
     else:
         print("Failed to send data to influx")
@@ -85,8 +86,8 @@ def database_connection():
         url=os.getenv("INFLUX_URL")+":"+os.getenv("INFLUX_PORT"),
         token=os.getenv("INFLUX_TOKEN"),
         org=os.getenv("INFLUX_ORG"),
-        ssl=os.getenv("INFLUX_SSL"),
-        verify_ssl=os.getenv("INFLUX_VERIFY_SSL"),
+        # ssl=os.getenv("INFLUX_SSL"),
+        # verify_ssl=os.getenv("INFLUX_VERIFY_SSL"),
     )
     return client
 
