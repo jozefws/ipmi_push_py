@@ -4,6 +4,7 @@ from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.client.exceptions import InfluxDBError
 from datetime import datetime
+from dotenv import load_dotenv
  
 # Run ipmi command and return the output
 def run_ipmi_sensors():
@@ -68,6 +69,9 @@ def to_dict(cpu_temps, psu_watts, hostname):
 
 # Send to localhost influx database
 def send_to_influx(dict):
+    
+    load_dotenv()
+
     print(os.getenv("INFLUX_URL"))
     print(os.getenv("INFLUX_PORT"))
     url_port = os.getenv("INFLUX_URL") + ":" + os.getenv("INFLUX_PORT")
