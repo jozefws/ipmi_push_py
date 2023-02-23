@@ -45,7 +45,7 @@ def to_dict(cpu_temps, psu_watts, hostname):
                 "cpu": cpu_count
             },
             "fields": {
-                "value": int(i)
+                "value": i
             },
             "time": timestamp
         })
@@ -59,7 +59,7 @@ def to_dict(cpu_temps, psu_watts, hostname):
                 "psu": psu_count
             },
             "fields": {
-                "value": int(i)
+                "value": i
             },
             "time": timestamp
         })
