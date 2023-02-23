@@ -45,8 +45,7 @@ def encode_to_json(cpu_temps, psu_watts, hostname):
     json_body = []
     cpu_count = 1
     psu_count = 1
-    t = datetime.utcnow()
-    timestamp = t.isoformat("T") + "Z"
+    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     
     for i in cpu_temps:
         json_body.append({
