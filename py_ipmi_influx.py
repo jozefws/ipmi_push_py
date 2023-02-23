@@ -18,9 +18,9 @@ def run_ipmi_sensors():
         j = i.split(',')
         try:
             if(re.search('CPU[0-9] Temperature', j[1])):
-                cpu_temps.append(j[3] + "c")
+                cpu_temps.append(j[3])
             elif("PMBPower" in j[1]):
-                psu_watts.append(j[3]+ "W")
+                psu_watts.append(j[3])
         except:
             pass
     return cpu_temps, psu_watts
@@ -45,7 +45,7 @@ def to_dict(cpu_temps, psu_watts, hostname):
                 "cpu": cpu_count
             },
             "fields": {
-                "value": i
+                "value": int(i)
             },
             "time": timestamp
         })
@@ -59,7 +59,7 @@ def to_dict(cpu_temps, psu_watts, hostname):
                 "psu": psu_count
             },
             "fields": {
-                "value": i
+                "value": int(i)
             },
             "time": timestamp
         })
@@ -72,10 +72,8 @@ def send_to_influx(dict):
     
     load_dotenv()
 
-    print(os.getenv("INFLUX_URL"))
-    print(os.getenv("INFLUX_PORT"))
     url_port = os.getenv("INFLUX_URL") + ":" + os.getenv("INFLUX_PORT")
-    print(url_port)
+    
     client = InfluxDBClient(
         url=url_port,
         token=os.getenv("INFLUX_TOKEN"),
@@ -88,7 +86,6 @@ def send_to_influx(dict):
             client.write_api(write_options=SYNCHRONOUS).write(bucket=os.getenv("INFLUX_BUCKET"), record=dict)
         except InfluxDBError as e:
             print(e)
-
     
 
 if __name__ == '__main__':
