@@ -24,7 +24,10 @@ def run_ipmi_sensors():
                 psu_watts.append(j[3])
         except:
             pass
-    print("CPU temps: " + str(cpu_temps) + " PSU watts: " + str(psu_watts))
+
+    if(cpu_temps == [] or psu_watts == []):
+        print("No data returned from ipmi-sensors - likely a formatting issue")
+        exit(1)
     return cpu_temps, psu_watts
 
 # Get the hostname
