@@ -23,7 +23,7 @@ def run_ipmi_sensors():
             elif("PMBPower" in j[1]):
                 psu_watts.append(j[3])
         except:
-            print("Error parsing ipmi-sensors output")
+            pass
     print("CPU temps: " + str(cpu_temps) + " PSU watts: " + str(psu_watts))
     return cpu_temps, psu_watts
 
