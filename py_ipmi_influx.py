@@ -5,6 +5,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.client.exceptions import InfluxDBError
 from datetime import datetime
 from dotenv import load_dotenv
+import urllib3
  
 # Run ipmi command and return the output
 def run_ipmi_sensors():
@@ -22,7 +23,8 @@ def run_ipmi_sensors():
             elif("PMBPower" in j[1]):
                 psu_watts.append(j[3])
         except:
-            pass
+            print("Error parsing ipmi-sensors output")
+    print("CPU temps: " + str(cpu_temps) + " PSU watts: " + str(psu_watts))
     return cpu_temps, psu_watts
 
 # Get the hostname
@@ -78,17 +80,19 @@ def send_to_influx(dict):
         url=url_port,
         token=os.getenv("INFLUX_TOKEN"),
         org=os.getenv("INFLUX_ORG"),
-        verify_ssl=False
+        verify_ssl=os.getenv("INFLUX_VERIFY_SSL")
     )
 
     with client:
         try:
             client.write_api(write_options=SYNCHRONOUS).write(bucket=os.getenv("INFLUX_BUCKET"), record=dict)
         except InfluxDBError as e:
+            print("Error writing to influxdb: ")
             print(e)
     
 
 if __name__ == '__main__':
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     cpu_temps, psu_watts = run_ipmi_sensors()
     hostname = get_hostname()
     data = to_dict(cpu_temps, psu_watts, hostname)
